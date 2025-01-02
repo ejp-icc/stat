@@ -63,51 +63,32 @@
         </footer>
     </div>
 
-    <script src="https://apis.google.com/js/api.js"></script>
     <script>
-        function initApi() {
-            gapi.client.init({
-                'apiKey': 'AIzaSyCw_DkDxDzfbfuWdp4czAzp1MkNUPGbHDk',  // Ta clé API
-            }).then(function () {
-                loadSheetData();
-            });
+        // Lien public de ton Google Sheet (converti en CSV)
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU/gviz/tq?tqx=out:csv&sheet=Sheet1";
+
+        // Fonction pour récupérer les données du Google Sheet
+        function fetchSheetData() {
+            fetch(sheetUrl)
+                .then(response => response.text())
+                .then(csvData => processCSVData(csvData))
+                .catch(error => console.error('Erreur de récupération des données:', error));
         }
 
-        function loadSheetData() {
-            // ID de ton fichier Google Sheets, que tu peux obtenir dans l'URL de ton fichier
-            var spreadsheetId = '1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU'; 
-            var range = 'Sheet1!A1:Z100';  // Change le range pour inclure les cellules nécessaires
+        // Fonction pour traiter les données CSV
+        function processCSVData(csvData) {
+            const rows = csvData.split('\n');
+            const firstRow = rows[0].split(',');
 
-            // Appel à l'API Google Sheets pour récupérer les données
-            gapi.client.sheets.spreadsheets.values.get({
-                spreadsheetId: spreadsheetId,
-                range: range,
-            }).then(function (response) {
-                var data = response.result.values;
-                console.log(data);  // Affiche les données récupérées dans la console
-                if (data.length > 0) {
-                    updateStats(data);
-                }
-            }, function (error) {
-                console.error('Erreur lors de la récupération des données', error);
-            });
-        }
-
-        function updateStats(data) {
-            // Supposons que tu as des données dans les colonnes A, B, et C de ton fichier Google Sheets
-            // Met à jour les éléments HTML avec les données
-            document.getElementById('souls').innerText = data[0][0]; // Ex : Colonne A
-            document.getElementById('newcomers').innerText = data[0][1]; // Ex : Colonne B
-            document.getElementById('growth').innerText = data[0][2]; // Ex : Colonne C
+            // On suppose que les données sont dans les premières colonnes : "souls", "newcomers", "growth"
+            document.getElementById('souls').innerText = firstRow[0] || 0;
+            document.getElementById('newcomers').innerText = firstRow[1] || 0;
+            document.getElementById('growth').innerText = firstRow[2] || 0;
             document.getElementById('lastUpdated').innerText = new Date().toLocaleString();
         }
 
-        function handleClientLoad() {
-            gapi.load('client', initApi);
-        }
-
-        // Charge l'API lors du chargement de la page
-        window.onload = handleClientLoad;
+        // Initialiser la récupération des données au chargement de la page
+        window.onload = fetchSheetData;
     </script>
 </body>
 </html>
