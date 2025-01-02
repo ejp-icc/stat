@@ -54,10 +54,6 @@
             <span id="newcomers">0</span> nouveaux participants
         </div>
 
-        <div class="stat">
-            Croissance démographique : <span id="growth">0</span>
-        </div>
-
         <footer>
             Dernière mise à jour : <span id="lastUpdated">--/--/----</span>
         </footer>
@@ -78,13 +74,21 @@
         // Fonction pour traiter les données CSV
         function processCSVData(csvData) {
             const rows = csvData.split('\n');
-            const firstRow = rows[0].split(',');
+            
+            // Ignorer la première ligne (headers) et traiter les données à partir de la deuxième ligne
+            if (rows.length > 1) {
+                const secondRow = rows[1].split(',');
 
-            // On suppose que les données sont dans les premières colonnes : "souls", "newcomers", "growth"
-            document.getElementById('souls').innerText = firstRow[0] || 0;
-            document.getElementById('newcomers').innerText = firstRow[1] || 0;
-            document.getElementById('growth').innerText = firstRow[2] || 0;
-            document.getElementById('lastUpdated').innerText = new Date().toLocaleString();
+                // Extraction des colonnes Âmes gagnées et Nouveaux
+                const soulsIndex = 1; // Index de "Âmes gagnées"
+                const newcomersIndex = 2; // Index de "Nouveaux"
+
+                document.getElementById('souls').innerText = secondRow[soulsIndex] || 0;
+                document.getElementById('newcomers').innerText = secondRow[newcomersIndex] || 0;
+                document.getElementById('lastUpdated').innerText = new Date().toLocaleString();
+            } else {
+                console.error('Pas de données disponibles après la ligne d'en-tête.');
+            }
         }
 
         // Initialiser la récupération des données au chargement de la page
