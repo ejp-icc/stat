@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,39 +59,45 @@
     </div>
 
     <script>
-        // Lien public de ton Google Sheet (converti en CSV)
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU/gviz/tq?tqx=out:csv&sheet=Sheet1";
+        // Ta clé API Google
+        const apiKey = "AIzaSyCw_DkDxDzfbfuWdp4czAzp1MkNUPGbHDk";
+        const spreadsheetId = "1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU"; // ID de ton Google Sheet
+        const range = "Sheet1!A:D"; // Plage des données (Date, Âmes gagnées, Nouveaux, Remarques)
+
+        // URL de l'API Google Sheets
+        const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
 
         // Fonction pour récupérer les données du Google Sheet
         function fetchSheetData() {
-            fetch(sheetUrl)
-                .then(response => response.text())
-                .then(csvData => processCSVData(csvData))
-                .catch(error => console.error('Erreur de récupération des données:', error));
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => processSheetData(data))
+                .catch(error => console.error('Erreur de récupération des données :', error));
         }
 
-        // Fonction pour traiter les données CSV
-        function processCSVData(csvData) {
-            const rows = csvData.split('\n');
-            
-            // Ignorer la première ligne (headers) et traiter les données à partir de la deuxième ligne
-            if (rows.length > 1) {
-                const secondRow = rows[1].split(',');
+        // Fonction pour traiter les données récupérées
+        function processSheetData(data) {
+            if (data.values && data.values.length > 1) {
+                // Dernière ligne des données
+                const lastRow = data.values[data.values.length - 1];
 
-                // Extraction des colonnes Âmes gagnées et Nouveaux
-                const soulsIndex = 1; // Index de "Âmes gagnées"
-                const newcomersIndex = 2; // Index de "Nouveaux"
+                // Colonnes : Âmes gagnées et Nouveaux
+                const souls = lastRow[1] || 0; // Âmes gagnées
+                const newcomers = lastRow[2] || 0; // Nouveaux
+                const lastUpdated = lastRow[0] || "N/A"; // Date
 
-                document.getElementById('souls').innerText = secondRow[soulsIndex] || 0;
-                document.getElementById('newcomers').innerText = secondRow[newcomersIndex] || 0;
-                document.getElementById('lastUpdated').innerText = new Date().toLocaleString();
+                // Mise à jour des éléments HTML
+                document.getElementById('souls').innerText = souls;
+                document.getElementById('newcomers').innerText = newcomers;
+                document.getElementById('lastUpdated').innerText = lastUpdated;
             } else {
-                console.error('Pas de données disponibles après la ligne d'en-tête.');
+                console.error('Pas de données disponibles dans le Google Sheet.');
             }
         }
 
-        // Initialiser la récupération des données au chargement de la page
-        window.onload = fetchSheetData;
+        // Appeler la fonction au chargement de la page
+        fetchSheetData();
     </script>
 </body>
 </html>
+
